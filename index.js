@@ -148,6 +148,17 @@ function formatAsError(dep) {
   return sidekickAnalyser.createAnnotation(data);
 }
 
+/**
+ * Run analysis and return a cliReport object. CliReport's can be printed to stdout by running through outputCliReport
+ * @param manifest
+ * @param data
+ * @returns {{
+ * deps: [any dependencies that are out of date],
+ * devDeps: [any dev dependencies that are out of date],
+ * optDeps: [any optional dependencies that are out of date],
+ * cliReport: [lines to output to stdout]
+ * }}
+ */
 function packageDependenciesAsCliReport(manifest, data){
   var ret = {name: manifest.name};
   var deps = data[0], devDeps = data[1], optDeps = data[2];
@@ -164,11 +175,12 @@ function packageDependenciesAsCliReport(manifest, data){
   var header;
   if(total > 0){
     var depStr = total === 1 ? 'dependency' : 'dependencies';
-    header = cliLine(total + ' ' + depStr + ' could be updated:', 'yellow');
+    header = cliLine(total + ' ' + depStr + ' could be updated:', 'error');
   } else {
-    header = cliLine('All dependencies are up to date!', 'green');
+    header = cliLine('All dependencies are up to date!', 'ok');
   }
   cliReport.push(header);
+
   addDepUpdatedLine(ret.deps);
   addDepUpdatedLine(ret.devDeps, 'dev');
   addDepUpdatedLine(ret.optDeps, 'opt');
@@ -189,10 +201,10 @@ function packageDependenciesAsCliReport(manifest, data){
 
     if(deps.length > 0){
       var depStr = deps.length === 1 ? 'dependency' : 'dependencies';
-      cliReport.push(cliLine(depType + ' ' + deps.length + ' ' + depStr + ' could be updated', 'yellow'));
+      cliReport.push(cliLine(depType + ' ' + deps.length + ' ' + depStr + ' could be updated', 'error'));
       cliReport.push(cliLine(deps.join('\n')));
     } else {
-      cliReport.push(cliLine(depType + tabs + 'up to date', 'green'));
+      cliReport.push(cliLine(depType + tabs + 'up to date', 'ok'));
     }
   }
 
@@ -224,10 +236,10 @@ function packageDependenciesAsCliReport(manifest, data){
 module.exports.outputCliReport = function(report){
   report.forEach(function(line){
     switch(line.colour) {
-      case 'green' :
+      case 'ok' :
         console.log(chalk.green(line.message));
         break;
-      case 'yellow' :
+      case 'error' :
         console.log(chalk.yellow(line.message));
         break;
       default :
