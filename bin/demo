@@ -1,5 +1,0 @@
-#!/bin/bash
-
-printf "\n%s\n\n" 'Demoing'
-
-node dependency_checker.js < config.json
