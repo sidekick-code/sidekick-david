@@ -172,7 +172,8 @@ function packageDependenciesAsCliReport(manifest, data){
   ret.optDepInstallStr = getInstallStr(optDeps);
 
   var total = ret.deps.length + ret.devDeps.length + ret.optDeps.length;
-  var header;
+  cliReport.push(cliLine('-- Dependencies --------------', 'info'));
+  var header = '';
   if(total > 0){
     var depStr = total === 1 ? 'dependency' : 'dependencies';
     header = cliLine(total + ' ' + depStr + ' could be updated:', 'error');
@@ -184,6 +185,7 @@ function packageDependenciesAsCliReport(manifest, data){
   addDepUpdatedLine(ret.deps);
   addDepUpdatedLine(ret.devDeps, 'dev');
   addDepUpdatedLine(ret.optDeps, 'opt');
+  cliReport.push(cliLine(''));
   ret.cliReport = cliReport;
   return ret;
 
@@ -201,7 +203,7 @@ function packageDependenciesAsCliReport(manifest, data){
 
     if(deps.length > 0){
       var depStr = deps.length === 1 ? 'dependency' : 'dependencies';
-      cliReport.push(cliLine(depType + ' ' + deps.length + ' ' + depStr + ' could be updated', 'error'));
+      cliReport.push(cliLine(depType + tabs + deps.length + ' ' + depStr + ' could be updated', 'error'));
       cliReport.push(cliLine(deps.join('\n')));
     } else {
       cliReport.push(cliLine(depType + tabs + 'up to date', 'ok'));
@@ -241,6 +243,9 @@ module.exports.outputCliReport = function(report){
         break;
       case 'error' :
         console.log(chalk.yellow(line.message));
+        break;
+      case 'info' :
+        console.log(chalk.cyan(line.message));
         break;
       default :
         console.log(chalk.grey(line.message));

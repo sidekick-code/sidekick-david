@@ -51,6 +51,7 @@ describe('dependency analyser', function() {
 
       sd.runCliReport(manifest).then(function(results){
         sd.outputCliReport(results.cliReport);
+        console.log('\n');
         assert.equal(results.deps.length, 2);
         assert.equal(results.devDeps.length, 1);
         assert.equal(results.optDeps.length, 1);
