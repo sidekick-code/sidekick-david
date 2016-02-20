@@ -49,7 +49,7 @@ describe('dependency analyser', function() {
       manifest.optionalDependencies = {"jscs":  "0.0.1"};  //put back deps
 
       sd.runCliReport(manifest).then(function(results){
-        console.log('\n\n' + results.cliOutput);
+        sd.outputCliReport(results.cliReport);
         assert.equal(results.deps.length, 1);
         assert.equal(results.devDeps.length, 1);
         assert.equal(results.optDeps.length, 1);
@@ -63,7 +63,7 @@ describe('dependency analyser', function() {
       manifest.devDependencies.chai = "0.0.1";  //put back deps
 
       sd.runCliReport(manifest).then(function(results){
-        console.log('\n\n' + results.cliOutput);
+        sd.outputCliReport(results.cliReport);
         assert.equal(results.deps.length, 0);
         assert.equal(results.devDeps.length, 1);
         done();
@@ -76,7 +76,7 @@ describe('dependency analyser', function() {
       manifest.dependencies.david = "0.0.1";  //put back deps
 
       sd.runCliReport(manifest).then(function(results){
-        console.log('\n\n' + results.cliOutput);
+        sd.outputCliReport(results.cliReport);
         assert.equal(results.deps.length, 1);
         assert.equal(results.devDeps.length, 0);
         done();
@@ -89,10 +89,23 @@ describe('dependency analyser', function() {
       manifest.optionalDependencies = {"jscs":  "0.0.1"};  //put back deps
 
       sd.runCliReport(manifest).then(function(results){
-        console.log('\n\n' + results.cliOutput);
+        sd.outputCliReport(results.cliReport);
         assert.equal(results.deps.length, 0);
         assert.equal(results.devDeps.length, 0);
         assert.equal(results.optDeps.length, 1);
+        done();
+      });
+    });
+
+    it('executes as cli - all deps up to date', function(done) {
+      delete require.cache[require.resolve('../package.json')];
+      var manifest = require('../package.json');
+
+      sd.runCliReport(manifest).then(function(results){
+        sd.outputCliReport(results.cliReport);
+        assert.equal(results.deps.length, 0);
+        assert.equal(results.devDeps.length, 0);
+        assert.equal(results.optDeps.length, 0);
         done();
       });
     });

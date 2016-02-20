@@ -3,6 +3,7 @@
 var sidekickAnalyser = require("sidekick-analyser");
 var david = require('david');
 var Promise = require('bluebird');
+var chalk = require('chalk');
 
 var fs = require('fs');
 
@@ -95,8 +96,8 @@ function scan(manifest) {
 
 function convertToErrors(data, fileContents){
   var deps = data[0], devDeps = data[1], optDeps = data[2];
-
   var results = [], prop;
+
   //trying to reduce required modules so no lodash
   for(prop in deps){
     if(deps.hasOwnProperty(prop)){
@@ -133,7 +134,7 @@ function convertToErrors(data, fileContents){
     var stable = dep.stable || 'None';
     var latest = dep.latest || 'None';
     return 'Dependency \'' + depName + '\' is out of date. You have \''
-	+ required + '\'. Latest stable is \'' + stable + '\'. (Latest: \'' + latest + '\').';
+        + required + '\'. Latest stable is \'' + stable + '\'. (Latest: \'' + latest + '\').';
   }
 }
 
@@ -150,6 +151,7 @@ function formatAsError(dep) {
 function packageDependenciesAsCliReport(manifest, data){
   var ret = {name: manifest.name};
   var deps = data[0], devDeps = data[1], optDeps = data[2];
+  var cliReport = [];
 
   ret.deps = prettify(deps);
   ret.depInstallStr = getInstallStr(deps);
@@ -159,31 +161,40 @@ function packageDependenciesAsCliReport(manifest, data){
   ret.optDepInstallStr = getInstallStr(optDeps);
 
   var total = ret.deps.length + ret.devDeps.length + ret.optDeps.length;
-  var header, body = '';
+  var header;
   if(total > 0){
     var depStr = total === 1 ? 'dependency' : 'dependencies';
-    header = total + ' ' + depStr + ' could be updated:\n';
+    header = cliLine(total + ' ' + depStr + ' could be updated:', 'yellow');
   } else {
-    header = 'All dependencies are up to date!\n';
+    header = cliLine('All dependencies are up to date!', 'green');
   }
-
-  if(ret.deps.length > 0){
-    body = 'Dependencies:\n' + ret.deps.join('\n') + '\n'
-  } else {
-    body = 'All dependencies up to date.\n';
-  }
-  if(ret.devDeps.length > 0){
-    body += 'Dev dependencies:\n' + ret.devDeps.join('\n') + '\n'
-  } else {
-    body += 'All dev dependencies up to date.\n';
-  }
-  if(ret.optDeps.length > 0){
-    body += 'Optional dependencies:\n' + ret.optDeps.join('\n') + '\n'
-  } else {
-    body += 'All optional dependencies up to date.\n';
-  }
-  ret.cliOutput = header + body;
+  cliReport.push(header);
+  addDepUpdatedLine(ret.deps);
+  addDepUpdatedLine(ret.devDeps, 'dev');
+  addDepUpdatedLine(ret.optDeps, 'opt');
+  ret.cliReport = cliReport;
   return ret;
+
+  function addDepUpdatedLine(deps, type){
+    var depType = '[Dependencies]';
+    var tabs = '          ';
+
+    if(type === 'dev'){
+      depType = '[Dev dependencies]';
+      tabs = '      ';
+    } else if(type === 'opt'){
+      depType = '[Optional dependencies]';
+      tabs = ' ';
+    }
+
+    if(deps.length > 0){
+      var depStr = deps.length === 1 ? 'dependency' : 'dependencies';
+      cliReport.push(cliLine(depType + ' ' + deps.length + ' ' + depStr + ' could be updated', 'yellow'));
+      cliReport.push(cliLine(deps.join('\n')));
+    } else {
+      cliReport.push(cliLine(depType + tabs + 'up to date', 'green'));
+    }
+  }
 
   function prettify(arr){
     var ret = [];
@@ -204,4 +215,24 @@ function packageDependenciesAsCliReport(manifest, data){
     });
     return str;
   }
+
+  function cliLine(message, colour){
+    return {"colour": colour, "message": message};
+  }
 }
+
+module.exports.outputCliReport = function(report){
+  report.forEach(function(line){
+    switch(line.colour) {
+      case 'green' :
+        console.log(chalk.green(line.message));
+        break;
+      case 'yellow' :
+        console.log(chalk.yellow(line.message));
+        break;
+      default :
+        console.log(chalk.grey(line.message));
+        break;
+    }
+  });
+};
