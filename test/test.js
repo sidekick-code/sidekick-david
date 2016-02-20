@@ -1,6 +1,7 @@
-var analyser = require("../../../analysis/src/analyser");
-
 var assert = require('chai').assert;
+
+var sd = require('../../sidekick-david');
+
 var fs = require('fs');
 var path = require('path');
 
@@ -8,25 +9,14 @@ describe('dependency analyser', function() {
 
   describe('config', function() {
 
-    var sd;
-
     before(function() {
-      this.config = analyser.load(__dirname + "/../");
-      sd = require('../../sidekick-david');
+      var configPath = path.join(__dirname, "/../config.json");
+      var content = fs.readFileSync(configPath, { encoding: "utf8" });
+      this.config = JSON.parse(content);
     });
 
     it('config exists for analyser', function() {
       assert.isObject(this.config, 'analyser config is an object');
-    });
-
-    it('turns interpreters and scripts into invocation', function() {
-      assert.match(this.config.command, /\bnode\b/);
-    });
-
-    it('interpreter command contains script', function() {
-      var re = /\/index\.js$/;
-      var matches = re.exec(this.config.command);
-      assert.equal(matches.length, 1);
     });
 
     it('executes as analyser', function(done) {

@@ -1,20 +1,23 @@
 'use strict';
 
-var analyserInput = require("../analyser-input/index");
+var sidekickAnalyser = require("sidekick-analyser");
 var david = require('david');
-var async = require('async');
-var fs = require('fs');
 var Promise = require('bluebird');
+
+var fs = require('fs');
+
 var location = require('./src/locationInFile');
 
 if(require.main === module) {
   execute();
 }
-
 module.exports = exports = execute;
 
+/**
+ * Entry function for every analyser. Use sidekickAnalyser to provide input and output functions.
+ */
 function execute() {
-  analyserInput(function(setup) {
+  sidekickAnalyser(function(setup) {
     var fileRegex = setup.fileRegex;  //you can override the package.json re in the analyser config
     var filePath = setup.filePath;  //the path to the current file that is being analysed
 
@@ -77,9 +80,8 @@ function scan(manifest) {
   var devOpts = {stable: true, dev: true};
   var optOpts = {stable: true, optional: true};
 
-  //david treats deps and devDeps separately
   var getDeps = Promise.promisify(david.getUpdatedDependencies);
-  //fetch both together
+  //david treats deps, devDeps and optDeps separately, so fetch all together
   return Promise.all([
     getDeps(manifest, opts),
     getDeps(manifest, devOpts),
@@ -92,7 +94,7 @@ function scan(manifest) {
 }
 
 function convertToErrors(data, fileContents){
-  var deps = data[0], devDeps = data[1];
+  var deps = data[0], devDeps = data[1], optDeps = data[2];
 
   var results = [], prop;
   //trying to reduce required modules so no lodash
@@ -107,24 +109,31 @@ function convertToErrors(data, fileContents){
       it(prop, devDeps[prop], true);
     }
   }
+
+  for(prop in optDeps){
+    if(optDeps.hasOwnProperty(prop)){
+      it(prop, optDeps[prop], false, true);
+    }
+  }
   return results;
 
-  function it(depName, dep, isDev){
-    var location = getPositionInPackageJson(depName, isDev);
+  function it(depName, dep, isDev, isOpt){
+    var location = getPositionInPackageJson(depName, isDev, isOpt);
     var message = getMessage(depName, dep);
     results.push(formatAsError({location: location, message: message}));
   }
 
   //TODO - better find in package.json (uses indexOf currently)
-  function getPositionInPackageJson(depName, isDev){
+  function getPositionInPackageJson(depName, isDev, isOpt){
     return location('"' + depName + '"', fileContents);
   }
 
   function getMessage(depName, dep) {
     var required = dep.required || '*';
     var stable = dep.stable || 'None';
-    //var latest = arr[depName].latest;
-    return 'Dependency \'' + depName + '\' is out of date. You have \'' + required + '\'. Latest stable is \'' + stable + '\''
+    var latest = dep.latest || 'None';
+    return 'Dependency \'' + depName + '\' is out of date. You have \''
+	+ required + '\'. Latest stable is \'' + stable + '\'. (Latest: \'' + latest + '\').';
   }
 }
 
@@ -135,7 +144,7 @@ function formatAsError(dep) {
     message: dep.message,
     kind: 'dependency_outdated'
   };
-  return analyserInput.createAnnotation(data);
+  return sidekickAnalyser.createAnnotation(data);
 }
 
 function packageDependenciesAsCliReport(manifest, data){

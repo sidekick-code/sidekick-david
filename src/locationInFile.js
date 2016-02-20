@@ -16,6 +16,6 @@ module.exports = function placeInFile(needle, haystack){
   };
 
   function colInLine(line, needle){
-    return 0;
+    return 0; //gui shows annoatations at the start of a line so we dont need this yet.
   }
 };

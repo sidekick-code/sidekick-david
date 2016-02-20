@@ -2,34 +2,30 @@
   "name": "sidekick-david",
   "version": "0.0.1",
   "description": "Uses 'david' to check that your node dependencies are up to date.",
-  "keywords": ["javascript", "code", "quality", "dependencies"],
-  "homepage": "https://sidekickcode.com",
+  "keywords": [
+    "javascript",
+    "code",
+    "quality",
+    "dependencies"
+  ],
+  "homepage": "https://sidekickjs.com",
   "bugs": {
-    "url": "https://github.com/sidekickcode/sidekick-david/issues"
+    "url": "https://github.com/sidekick-code/sidekick-david/issues"
   },
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/sidekickcode/sidekick-david.git"
+    "url": "https://github.com/sidekick-code/sidekick-david.git"
   },
   "scripts": {
-    "test": "exec mocha -R nyan  #OK you can remove the cat if you like"
+    "test": "exec mocha"
   },
   "author": "We Are Sidekick Ltd.",
   "license": "MIT",
-  "config": {
-    "interpreter": "node",
-    "scope": "file",
-    "category": "object",
-    "configurable": true,
-    "displayCategory": "dependencies",
-    "displayName": "Dependency checker",
-    "underlyingAnalyser": "[david](https://github.com/alanshaw/david)"
-  },
   "dependencies": {
-    "async": "^1.5.2",
+    "bluebird": "^3.3.1",
     "david": "^7.0.1",
-    "easy-stdin": "^1.0.1"
+    "sidekick-analyser": "^1.0.0"
   },
   "devDependencies": {
     "chai": "^3.5.0",
