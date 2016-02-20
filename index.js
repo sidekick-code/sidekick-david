@@ -163,6 +163,7 @@ function packageDependenciesAsCliReport(manifest, data){
   var ret = {name: manifest.name};
   var deps = data[0], devDeps = data[1], optDeps = data[2];
   var cliReport = [];
+  var SUCCESS_TICK = "✔";
 
   ret.deps = prettify(deps);
   ret.depInstallStr = getInstallStr(deps);
@@ -178,7 +179,7 @@ function packageDependenciesAsCliReport(manifest, data){
     var depStr = total === 1 ? 'dependency' : 'dependencies';
     header = cliLine(total + ' ' + depStr + ' could be updated:', 'error');
   } else {
-    header = cliLine('All dependencies are up to date!', 'ok');
+    header = cliLine(SUCCESS_TICK + ' All dependencies are up to date!', 'ok');
   }
   cliReport.push(header);
 
@@ -217,7 +218,7 @@ function packageDependenciesAsCliReport(manifest, data){
       var stable = arr[depName].stable || 'None';
       var latest = arr[depName].latest;
       //ret.push('\'%s\' - Required: %s Stable: %s Latest: %s', depName, required, stable, latest);
-      ret.push('\'' + depName + '\' - Required: ' + required + ', stable: ' + stable + ' (latest: ' + latest + ')');
+      ret.push('\'' + depName + '\' - you use: ' + required + ', which can be updated to stable: ' + stable + ' (latest: ' + latest + ')');
     });
     return ret;
   }
