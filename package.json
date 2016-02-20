@@ -24,7 +24,6 @@
   "license": "MIT",
   "dependencies": {
     "bluebird": "^3.3.1",
-    "chalk": "^1.1.1",
     "david": "^7.0.1",
     "sidekick-analyser": "^1.0.0"
   },

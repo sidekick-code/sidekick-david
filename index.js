@@ -1,9 +1,9 @@
 'use strict';
 
 var sidekickAnalyser = require("sidekick-analyser");
+var MESSAGE_TYPE = sidekickAnalyser.MESSAGE_TYPE;
 var david = require('david');
 var Promise = require('bluebird');
-var chalk = require('chalk');
 
 var fs = require('fs');
 
@@ -52,7 +52,7 @@ module.exports.run = function(manifest, fileContent) {
   return scan(manifest)
     .then(
       function(deps){
-        return convertToErrors(deps, fileContent);
+        return convertToAnnotations(deps, fileContent);
       },
       function(err){
         console.error("failed to analyse");
@@ -66,7 +66,9 @@ module.exports.runCliReport = function(manifest){
   return scan(manifest)
     .then(
       function(deps){
-        return packageDependenciesAsCliReport(manifest, deps);
+        var cliReport = packageDependenciesAsCliReport(manifest, deps);
+        sidekickAnalyser.outputCliReport(cliReport.cliOutput);
+        return cliReport;
       },
       function(err){
         console.error("failed to analyse");
@@ -94,7 +96,7 @@ function scan(manifest) {
   });
 }
 
-function convertToErrors(data, fileContents){
+function convertToAnnotations(data, fileContents){
   var deps = data[0], devDeps = data[1], optDeps = data[2];
   var results = [], prop;
 
@@ -121,7 +123,7 @@ function convertToErrors(data, fileContents){
   function it(depName, dep, isDev, isOpt){
     var location = getPositionInPackageJson(depName, isDev, isOpt);
     var message = getMessage(depName, dep);
-    results.push(formatAsError({location: location, message: message}));
+    results.push(formatAsAnnotation({location: location, message: message}));
   }
 
   //TODO - better find in package.json (uses indexOf currently)
@@ -138,7 +140,7 @@ function convertToErrors(data, fileContents){
   }
 }
 
-function formatAsError(dep) {
+function formatAsAnnotation(dep) {
   var data = {
     analyser: 'sidekick-david',
     location: dep.location,
@@ -162,9 +164,9 @@ function formatAsError(dep) {
 function packageDependenciesAsCliReport(manifest, data){
   var ret = {name: manifest.name};
   var deps = data[0], devDeps = data[1], optDeps = data[2];
-  var cliReport = [];
-  var SUCCESS_TICK = "✔";
+  var cliReport = sidekickAnalyser.getCliReportTemplate('Dependencies');
 
+  //get the deps and npm install strings for each of the dep types
   ret.deps = prettify(deps);
   ret.depInstallStr = getInstallStr(deps);
   ret.devDeps = prettify(devDeps);
@@ -172,14 +174,13 @@ function packageDependenciesAsCliReport(manifest, data){
   ret.optDeps = prettify(optDeps);
   ret.optDepInstallStr = getInstallStr(optDeps);
 
-  var total = ret.deps.length + ret.devDeps.length + ret.optDeps.length;
-  cliReport.push(cliLine('-- Dependencies --------------', 'info'));
   var header = '';
+  var total = ret.deps.length + ret.devDeps.length + ret.optDeps.length;
   if(total > 0){
     var depStr = total === 1 ? 'dependency' : 'dependencies';
-    header = cliLine(total + ' ' + depStr + ' could be updated:', 'error');
+    header = cliLine(total + ' ' + depStr + ' could be updated:', MESSAGE_TYPE.ERROR);
   } else {
-    header = cliLine(SUCCESS_TICK + ' All dependencies are up to date!', 'ok');
+    header = cliLine(sidekickAnalyser.SUCCESS_TICK + ' All dependencies are up to date!', MESSAGE_TYPE.OK);
   }
   cliReport.push(header);
 
@@ -187,7 +188,7 @@ function packageDependenciesAsCliReport(manifest, data){
   addDepUpdatedLine(ret.devDeps, 'dev');
   addDepUpdatedLine(ret.optDeps, 'opt');
   cliReport.push(cliLine(''));
-  ret.cliReport = cliReport;
+  ret.cliOutput = cliReport;
   return ret;
 
   function addDepUpdatedLine(deps, type){
@@ -204,10 +205,10 @@ function packageDependenciesAsCliReport(manifest, data){
 
     if(deps.length > 0){
       var depStr = deps.length === 1 ? 'dependency' : 'dependencies';
-      cliReport.push(cliLine(depType + tabs + deps.length + ' ' + depStr + ' could be updated', 'error'));
+      cliReport.push(cliLine(depType + tabs + deps.length + ' ' + depStr + ' could be updated', MESSAGE_TYPE.ERROR));
       cliReport.push(cliLine(deps.join('\n')));
     } else {
-      cliReport.push(cliLine(depType + tabs + 'up to date', 'ok'));
+      cliReport.push(cliLine(depType + tabs + 'up to date', MESSAGE_TYPE.OK));
     }
   }
 
@@ -218,7 +219,8 @@ function packageDependenciesAsCliReport(manifest, data){
       var stable = arr[depName].stable || 'None';
       var latest = arr[depName].latest;
       //ret.push('\'%s\' - Required: %s Stable: %s Latest: %s', depName, required, stable, latest);
-      ret.push('\'' + depName + '\' - you use: ' + required + ', which can be updated to stable: ' + stable + ' (latest: ' + latest + ')');
+      ret.push('\'' + depName + '\' - you use: ' + required + ', which can be updated to stable: '
+          + stable + ' (latest: ' + latest + ')');
     });
     return ret;
   }
@@ -235,22 +237,3 @@ function packageDependenciesAsCliReport(manifest, data){
     return {"colour": colour, "message": message};
   }
 }
-
-module.exports.outputCliReport = function(report){
-  report.forEach(function(line){
-    switch(line.colour) {
-      case 'ok' :
-        console.log(chalk.green(line.message));
-        break;
-      case 'error' :
-        console.log(chalk.yellow(line.message));
-        break;
-      case 'info' :
-        console.log(chalk.cyan(line.message));
-        break;
-      default :
-        console.log(chalk.grey(line.message));
-        break;
-    }
-  });
-};

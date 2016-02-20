@@ -19,7 +19,6 @@ describe("Dependency checker", function() {
       if(er){
         expect(er).to.equal(null);
       } else {
-        console.log(JSON.stringify(data));
         expect(data.name).to.equal('blank');
         expect(data.deps).to.have.length(0);
         expect(data.devDeps).to.have.length(0);
@@ -48,7 +47,6 @@ describe("Dependency checker", function() {
       if(er){
         expect(er).to.equal(null);
       } else {
-        console.log(JSON.stringify(data));
         expect(data.name).to.equal('test');
         expect(data.deps).to.have.length(2);
         expect(data.devDeps).to.have.length(0);
@@ -82,7 +80,6 @@ describe("Dependency checker", function() {
       if (er) {
         expect(er).to.equal(null);
       } else {
-        console.log(JSON.stringify(data));
         expect(data.name).to.equal('dependencies');
         expect(data.deps).to.have.length(2);
         expect(data.devDeps).to.have.length(2);

@@ -45,13 +45,11 @@ describe('dependency analyser', function() {
     it('executes as cli', function(done) {
       var manifest = require('../package.json');
       manifest.dependencies.david = "0.0.1";  //put back deps
-      manifest.dependencies.chalk = "0.0.1";  //put back deps
+      manifest.dependencies.bluebird = "0.0.1";  //put back deps
       manifest.devDependencies.chai = "0.0.1";  //put back deps
       manifest.optionalDependencies = {"jscs":  "0.0.1"};  //put back deps
 
       sd.runCliReport(manifest).then(function(results){
-        sd.outputCliReport(results.cliReport);
-        console.log('\n');
         assert.equal(results.deps.length, 2);
         assert.equal(results.devDeps.length, 1);
         assert.equal(results.optDeps.length, 1);
@@ -65,7 +63,6 @@ describe('dependency analyser', function() {
       manifest.devDependencies.chai = "0.0.1";  //put back deps
 
       sd.runCliReport(manifest).then(function(results){
-        sd.outputCliReport(results.cliReport);
         assert.equal(results.deps.length, 0);
         assert.equal(results.devDeps.length, 1);
         done();
@@ -78,7 +75,6 @@ describe('dependency analyser', function() {
       manifest.dependencies.david = "0.0.1";  //put back deps
 
       sd.runCliReport(manifest).then(function(results){
-        sd.outputCliReport(results.cliReport);
         assert.equal(results.deps.length, 1);
         assert.equal(results.devDeps.length, 0);
         done();
@@ -91,7 +87,6 @@ describe('dependency analyser', function() {
       manifest.optionalDependencies = {"jscs":  "0.0.1"};  //put back deps
 
       sd.runCliReport(manifest).then(function(results){
-        sd.outputCliReport(results.cliReport);
         assert.equal(results.deps.length, 0);
         assert.equal(results.devDeps.length, 0);
         assert.equal(results.optDeps.length, 1);
@@ -104,7 +99,6 @@ describe('dependency analyser', function() {
       var manifest = require('../package.json');
 
       sd.runCliReport(manifest).then(function(results){
-        sd.outputCliReport(results.cliReport);
         assert.equal(results.deps.length, 0);
         assert.equal(results.devDeps.length, 0);
         assert.equal(results.optDeps.length, 0);
