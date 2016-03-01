@@ -14,13 +14,16 @@ if(require.main === module) {
 }
 module.exports = exports = execute;
 
+var setup;
+
 /**
  * Entry function for every analyser. Use sidekickAnalyser to provide input and output functions.
  */
 function execute() {
-  sidekickAnalyser(function(setup) {
+  sidekickAnalyser(function(analyserSetup) {
     var fileRegex = setup.fileRegex;  //you can override the package.json re in the analyser config
     var filePath = setup.filePath;  //the path to the current file that is being analysed
+    setup = analyserSetup;
 
     if(isManifest(fileRegex)){
       fs.readFile(filePath, function(err, fileContents){
@@ -48,27 +51,18 @@ function isManifest(fileRegex){
   return matches[0];
 }
 
+//public for testing
 module.exports.run = function(manifest, fileContent) {
+  if(!fileContent){
+    console.error("failed to analyse - no fileContent");
+    console.log({ error: err });
+    process.exit(1);
+  }
+
   return scan(manifest)
     .then(
       function(deps){
         return convertToAnnotations(deps, fileContent);
-      },
-      function(err){
-        console.error("failed to analyse");
-        console.log({ error: err });
-        process.exit(1);
-      }
-    );
-};
-
-module.exports.runCliReport = function(manifest){
-  return scan(manifest)
-    .then(
-      function(deps){
-        var cliReport = packageDependenciesAsCliReport(manifest, deps);
-        sidekickAnalyser.outputCliReport(cliReport.cliOutput);
-        return cliReport;
       },
       function(err){
         console.error("failed to analyse");
@@ -123,12 +117,24 @@ function convertToAnnotations(data, fileContents){
   function it(depName, dep, isDev, isOpt){
     var location = getPositionInPackageJson(depName, isDev, isOpt);
     var message = getMessage(depName, dep);
-    results.push(formatAsAnnotation({location: location, message: message}));
+    var kind = getKind(isDev, isOpt);
+
+    results.push(formatAsAnnotation({location: location, message: message, kind: kind}));
   }
 
   //TODO - better find in package.json (uses indexOf currently)
   function getPositionInPackageJson(depName, isDev, isOpt){
     return location('"' + depName + '"', fileContents);
+  }
+
+  function getKind(isDev, isOpt){
+    if(isDev){
+      return 'dev_dependency_outdated';
+    } else if(isOpt){
+      return 'optional_dependency_outdated';
+    } else {
+      return 'dependency_outdated';
+    }
   }
 
   function getMessage(depName, dep) {
@@ -141,13 +147,25 @@ function convertToAnnotations(data, fileContents){
 }
 
 function formatAsAnnotation(dep) {
-  var data = {
-    analyser: 'sidekick-david',
-    location: dep.location,
+  var analyserName, displayName, location = {startCol: 0, endCol: 0};
+
+  if(setup){
+    analyserName = setup.analyser;
+    displayName = setup.displayName;
+  } else {
+    analyserName = 'sidekick-david';
+    displayName = 'dependencies';
+  }
+  location.startLine = dep.location.line;
+  location.endLine = dep.location.line;
+
+  return {
+    analyser: analyserName,
+    displayName: displayName,
+    location: location,
     message: dep.message,
-    kind: 'dependency_outdated'
+    kind: dep.kind
   };
-  return sidekickAnalyser.createAnnotation(data);
 }
 
 /**
