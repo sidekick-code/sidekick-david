@@ -51,8 +51,8 @@ function isManifest(fileRegex){
   return matches[0];
 }
 
-//public for testing
-module.exports.run = function(manifest, fileContent) {
+module.exports._testRun = run;  //exposed to tests
+function run(manifest, fileContent) {
   if(!fileContent){
     console.error("failed to analyse - no fileContent");
     console.log({ error: err });

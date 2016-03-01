@@ -9,7 +9,7 @@ var _ = require('lodash');
 
 describe('dependency analyser', function() {
 
-  describe('config', function() {
+  describe('config - required internet connection as it hits npm', function() {
 
     before(function() {
       var configPath = path.join(__dirname, "/../config.json");
@@ -26,7 +26,7 @@ describe('dependency analyser', function() {
       manifest.dependencies.david = "0.0.1";  //put back deps
 
       fs.readFile(path.join(__dirname, '/../package.json'), "utf-8", function(err, data){
-        sd.run(manifest, data).then(function(results){
+        sd._testRun(manifest, data).then(function(results){
           var badDavidDep = {
             analyser: 'sidekick-david',
             kind: 'dependency_outdated',
@@ -65,7 +65,7 @@ describe('dependency analyser', function() {
       manifest.optionalDependencies = {"jscs":  "0.0.1"};  //put back deps
 
       fs.readFile(path.join(__dirname, '/../package.json'), "utf-8", function(err, data) {
-        sd.run(manifest, data).then(function (results) {
+        sd._testRun(manifest, data).then(function (results) {
           expect(results.length).to.equal(4);
           expect(_.filter(results, {'kind': 'dependency_outdated'}).length).to.equal(2);
           expect(_.filter(results, {'kind': 'dev_dependency_outdated'}).length).to.equal(1);
@@ -81,7 +81,7 @@ describe('dependency analyser', function() {
       manifest.devDependencies.chai = "0.0.1";  //put back deps
 
       fs.readFile(path.join(__dirname, '/../package.json'), "utf-8", function(err, data) {
-        sd.run(manifest, data).then(function(results){
+        sd._testRun(manifest, data).then(function(results){
           expect(results.length).to.equal(1);
           expect(_.filter(results, {'kind': 'dependency_outdated'}).length).to.equal(0);
           expect(_.filter(results, {'kind': 'dev_dependency_outdated'}).length).to.equal(1);
@@ -97,7 +97,7 @@ describe('dependency analyser', function() {
       manifest.dependencies.david = "0.0.1";  //put back deps
 
       fs.readFile(path.join(__dirname, '/../package.json'), "utf-8", function(err, data) {
-        sd.run(manifest, data).then(function(results){
+        sd._testRun(manifest, data).then(function(results){
           expect(results.length).to.equal(1);
           expect(_.filter(results, {'kind': 'dependency_outdated'}).length).to.equal(1);
           expect(_.filter(results, {'kind': 'dev_dependency_outdated'}).length).to.equal(0);
@@ -113,7 +113,7 @@ describe('dependency analyser', function() {
       manifest.optionalDependencies = {"jscs":  "0.0.1"};  //put back deps
 
       fs.readFile(path.join(__dirname, '/../package.json'), "utf-8", function(err, data) {
-        sd.run(manifest, data).then(function(results){
+        sd._testRun(manifest, data).then(function(results){
           expect(results.length).to.equal(1);
           expect(_.filter(results, {'kind': 'dependency_outdated'}).length).to.equal(0);
           expect(_.filter(results, {'kind': 'dev_dependency_outdated'}).length).to.equal(0);
@@ -128,7 +128,7 @@ describe('dependency analyser', function() {
       var manifest = require('../package.json');
 
       fs.readFile(path.join(__dirname, '/../package.json'), "utf-8", function(err, data) {
-        sd.run(manifest, data).then(function(results){
+        sd._testRun(manifest, data).then(function(results){
           expect(results.length).to.equal(0);
           done();
         });
