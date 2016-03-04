@@ -3,11 +3,13 @@
   "version": "0.0.1",
   "interpreter": "node",
   "script": "index.js",
-  "scope": "file",
+  "scope": "blob",
   "category": "object",
-  "configurable": true,
+  "configurable": false,
+  "language": "all",
   "displayCategory": "dependencies",
-  "displayName": "Dependency checker",
-  "shortDescription": "Uses 'david' to check that your node dependencies are up to date.",
+  "displayColor": "yellow",
+  "displayName": "Dependencies (uses david-dm)",
+  "shortDescription": "Checks that your node dependencies are up to date. Uses david.",
   "underlyingAnalyser": "[david](https://github.com/alanshaw/david)"
 }

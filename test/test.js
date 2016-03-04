@@ -4,6 +4,7 @@ var expect = require('chai').expect;
 var sd = require('../../sidekick-david');
 
 var fs = require('fs');
+var exec = require("child_process").exec;
 var path = require('path');
 var _ = require('lodash');
 
@@ -11,14 +12,34 @@ describe('dependency analyser', function() {
 
   describe('config - required internet connection as it hits npm', function() {
 
+    var self = this;
+
     before(function() {
       var configPath = path.join(__dirname, "/../config.json");
       var content = fs.readFileSync(configPath, { encoding: "utf8" });
-      this.config = JSON.parse(content);
+      self.config = JSON.parse(content);
     });
 
+    function createInput() {
+      var filePath = path.join(__dirname, '../package.json');
+      var fileContent = fs.readFileSync(filePath, { encoding: "utf8" });
+
+      return JSON.stringify(self.config) + "\n"
+          + JSON.stringify({ path: filePath}) + "\n"
+          + fileContent;
+    }
+
     it('config exists for analyser', function() {
-      assert.isObject(this.config, 'analyser config is an object');
+      assert.isObject(self.config, 'analyser config is an object');
+    });
+
+    it('can run analyser from cli', function(done) {
+      runFixture(createInput(),
+        function(err, stdout) {
+          if(err) return done(err);
+          self.stdout = stdout;
+          done();
+        });
     });
 
     it('executes as analyser', function(done) {
@@ -30,7 +51,6 @@ describe('dependency analyser', function() {
           var badDavidDep = {
             analyser: 'sidekick-david',
             kind: 'dependency_outdated',
-            displayName: 'dependencies',
             location: {
               startCol: 0,
               endCol: 0,
@@ -43,14 +63,13 @@ describe('dependency analyser', function() {
           var returnedDavidDep = results[0];
           expect(returnedDavidDep.analyser).to.equal(badDavidDep.analyser);
           expect(returnedDavidDep.kind).to.equal(badDavidDep.kind);
-          expect(returnedDavidDep.displayName).to.equal(badDavidDep.displayName);
 
           expect(returnedDavidDep).to.have.deep.property('location.startLine', badDavidDep.location.startLine);
           expect(returnedDavidDep).to.have.deep.property('location.endLine', badDavidDep.location.endLine);
           expect(returnedDavidDep).to.have.deep.property('location.startCol', badDavidDep.location.startCol);
           expect(returnedDavidDep).to.have.deep.property('location.endCol', badDavidDep.location.endCol);
 
-          var messageRe = /Dependency \'david\' is out of date. You have \'0\.0\.1\'./;
+          var messageRe = /Dependency \'david\' is out of date. You use \'0\.0\.1\'./;
           expect(returnedDavidDep.message).to.match(messageRe);
           done();
         });
@@ -134,5 +153,11 @@ describe('dependency analyser', function() {
         });
       });
     });
-  })
+  });
+
+  function runFixture(input, cb) {
+    var cmd = `node ${path.join(__dirname, '../index.js')}`;
+    var child = exec(cmd, cb);
+    child.stdin.end(input);
+  }
 });
