@@ -4,6 +4,7 @@ const sidekickAnalyser = require("sidekick-analyser");
 const david = require('david');
 const Promise = require('bluebird');
 const fs = require('fs');
+const path = require('path');
 
 const location = require('./src/locationInFile');
 
@@ -14,13 +15,19 @@ module.exports = exports = execute;
 
 var annotationDefaults = {analyserName: 'sidekick-david'};
 
+var LOG_FILE =  path.join(__dirname, '/debug.log');
+
+//log to file as any stdout will be reported to the analyser runner
+function logger(message) {
+  fs.appendFile(LOG_FILE, message + '\n');
+}
+
 /**
  * Entry function for every analyser. Use sidekickAnalyser to provide input function.
  */
 function execute() {
   sidekickAnalyser(function(setup) {
     var fileRegex = setup.fileRegex;  //you can override the package.json re in the analyser config
-
 
     annotationDefaults = {analyserName: setup.analyser};
 
@@ -30,20 +37,20 @@ function execute() {
       });
     }
   });
-}
 
-/**
- * Check that the file being analysed is a package.json file
- * @param fileRegex (optional) will default to os specific re for package.json
- * @returns {*}
- */
-function isManifest(filePath, fileRegex){
-  var posixFileRegex = /\/package\.json$/i;
-  var win32FileRegex = /\\package\.json$/i;
-  var regex = process.platform === 'win32' ? win32FileRegex : posixFileRegex;  //use platform specific regex
-  var fileRe = fileRegex || regex; //you can override with a regex in the analyser config
+  /**
+   * Check that the file being analysed is a package.json file
+   * @param fileRegex (optional) will default to os specific re for package.json
+   * @returns {*}
+   */
+  function isManifest(filePath, fileRegex){
+    var posixFileRegex = /(\/package\.json$|^package\.json$)/i;
+    var win32FileRegex = /(\\package\.json$|^package\.json$)/i;
+    var regex = process.platform === 'win32' ? win32FileRegex : posixFileRegex;  //use platform specific regex
+    var fileRe = fileRegex || regex; //you can override with a regex in the analyser config
 
-  return fileRe.test(filePath);
+    return fileRe.test(filePath);
+  }
 }
 
 module.exports._testRun = run;  //exposed to tests

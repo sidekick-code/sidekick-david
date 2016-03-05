@@ -9,7 +9,8 @@
   "language": "all",
   "displayCategory": "dependencies",
   "displayColor": "yellow",
-  "displayName": "Dependencies (uses david-dm)",
+  "displayName": "Dependencies (david-dm)",
+  "itemType": "outdated dependency",
   "shortDescription": "Checks that your node dependencies are up to date. Uses david.",
   "underlyingAnalyser": "[david](https://github.com/alanshaw/david)"
 }
