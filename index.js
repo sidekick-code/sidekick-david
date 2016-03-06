@@ -1,10 +1,11 @@
 'use strict';
 
 const sidekickAnalyser = require("sidekick-analyser");
-const david = require('david');
-const Promise = require('bluebird');
 const fs = require('fs');
 const path = require('path');
+
+const david = require('david');
+const Promise = require('bluebird');
 
 const location = require('./src/locationInFile');
 
@@ -13,9 +14,9 @@ if(require.main === module) {
 }
 module.exports = exports = execute;
 
-var annotationDefaults = {analyserName: 'sidekick-david'};
+const annotationDefaults = {analyserName: 'sidekick-david'};
 
-var LOG_FILE =  path.join(__dirname, '/debug.log');
+const LOG_FILE =  path.join(__dirname, '/debug.log');
 
 //log to file as any stdout will be reported to the analyser runner
 function logger(message) {
