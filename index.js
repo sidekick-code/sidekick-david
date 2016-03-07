@@ -30,8 +30,6 @@ function execute() {
   sidekickAnalyser(function(setup) {
     var fileRegex = setup.fileRegex;  //you can override the package.json re in the analyser config
 
-    annotationDefaults = {analyserName: setup.analyser};
-
     if(isManifest(setup.path, fileRegex)){
       run(JSON.parse(setup.content), setup.content).then(function(results){
         console.log(JSON.stringify({ meta: results }));
@@ -45,9 +43,7 @@ function execute() {
    * @returns {*}
    */
   function isManifest(filePath, fileRegex){
-    var posixFileRegex = /(\/package\.json$|^package\.json$)/i;
-    var win32FileRegex = /(\\package\.json$|^package\.json$)/i;
-    var regex = process.platform === 'win32' ? win32FileRegex : posixFileRegex;  //use platform specific regex
+    var regex = /^package\.json$/i; //only match package.json in root (the repo's package.json)
     var fileRe = fileRegex || regex; //you can override with a regex in the analyser config
 
     return fileRe.test(filePath);
