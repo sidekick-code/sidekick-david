@@ -1,16 +1,20 @@
 {
   "analyser": "sidekick-david",
-  "version": "0.0.1",
+  "version": "1.0.1",
   "interpreter": "node",
   "script": "index.js",
   "scope": "blob",
   "category": "object",
   "configurable": false,
-  "language": "all",
-  "displayCategory": "dependencies",
-  "displayColor": "yellow",
+  "language": "json",
+  "shortName": "david-dm",
   "displayName": "Dependencies (david-dm)",
+  "displayCategory": "dependencies",
+  "displayColor": "purple",
   "itemType": "outdated dependency",
-  "shortDescription": "Checks that your node dependencies are up to date. Uses david.",
-  "underlyingAnalyser": "[david](https://github.com/alanshaw/david)"
+  "shortDescription": "Checks that your node dependencies are up to date.",
+  "underlyingAnalyser": {
+    "name": "david-dm",
+    "url": "https://github.com/alanshaw/david"
+  }
 }

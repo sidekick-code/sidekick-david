@@ -11,7 +11,7 @@ module.exports = function placeInFile(needle, haystack){
     line++;
   }
   return {
-    "line": line,
+    "line": line - 1, //0 based
     "col": colInLine(line, needle)
   };
 
