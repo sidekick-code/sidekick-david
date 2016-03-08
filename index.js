@@ -30,7 +30,7 @@ function execute() {
   sidekickAnalyser(function(setup) {
     var fileRegex = setup.fileRegex;  //you can override the package.json re in the analyser config
 
-    if(isManifest(setup.path, fileRegex)){
+    if(isManifest(setup.filePath, fileRegex)){
       run(JSON.parse(setup.content), setup.content).then(function(results){
         console.log(JSON.stringify({ meta: results }));
       });
@@ -50,8 +50,8 @@ function execute() {
   }
 }
 
-module.exports._testRun = run;  //exposed to tests
 //need the manifest as an object (for david) and the raw file contents (not stringified obj) so we can find line no.s
+module.exports._testRun = run;  //exposed to tests (hence the 2 args)
 function run(manifestObj, manifestContent) {
   if(!manifestContent){
     console.error("failed to analyse - no manifest content");
@@ -120,7 +120,7 @@ function convertToAnnotations(data, manifestContent){
     var kind = getKind(isDev, isOpt);
     var category = getCategory(isDev, isOpt);
 
-    results.push(formatAsAnnotation({
+    results.push(format({
       location: location,
       message: message,
       kind: kind,
@@ -156,11 +156,11 @@ function convertToAnnotations(data, manifestContent){
     var required = dep.required || '*';
     var stable = dep.stable || 'None';
     var latest = dep.latest || 'None';
-    return `Dependency '${depName}' is out of date. You use '${required}', which could be updated to stable: '${stable}'. (latest: '${latest}').`;
+    return `Dependency '${depName}' is out of date. You use '${required}', which could be updated to stable: '${stable}' (latest: '${latest}').`;
   }
 }
 
-function formatAsAnnotation(dep) {
+function format(dep) {
   var location = {startCol: 0, endCol: 0};
   location.startLine = dep.location.line;
   location.endLine = dep.location.line;
