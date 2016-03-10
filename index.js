@@ -16,7 +16,7 @@ module.exports = exports = execute;
 
 const annotationDefaults = {analyserName: 'sidekick-david'};
 
-const LOG_FILE =  path.join(__dirname, '/debug.log');
+const LOG_FILE = path.join(__dirname, '/debug.log');
 
 //log to file as any stdout will be reported to the analyser runner
 function logger(message) {
@@ -34,6 +34,8 @@ function execute() {
       run(JSON.parse(setup.content), setup.content).then(function(results){
         console.log(JSON.stringify({ meta: results }));
       });
+    } else {
+      console.log(JSON.stringify({ meta: [] }));  //file was .json but not the root package.json
     }
   });
 

@@ -1,7 +1,11 @@
 {
   "name": "sidekick-david",
   "version": "1.0.3",
-  "description": "Uses 'david' to check that your node dependencies are up to date.",
+  "main": "index.js",
+  "scripts": {
+    "test": "exec mocha"
+  },
+  "description": "Sidekick analyser that wraps 'david-dm'.",
   "keywords": [
     "javascript",
     "code",
@@ -12,13 +16,9 @@
   "bugs": {
     "url": "https://github.com/sidekickcode/sidekick-david/issues"
   },
-  "main": "index.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/sidekickcode/sidekick-david.git"
-  },
-  "scripts": {
-    "test": "exec mocha"
   },
   "author": "We Are Sidekick Ltd.",
   "license": "MIT",
