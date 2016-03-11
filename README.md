@@ -1,4 +1,4 @@
-# sidekick-david
+# sidekick-david <img url="https://travis-ci.org/sidekickcode/sidekick-david.svg?branch=master">
 
 [![Build Status](https://travis-ci.org/sidekickcode/sidekick-david.svg?branch=master)](https://travis-ci.org/sidekickcode/sidekick-david)
 
