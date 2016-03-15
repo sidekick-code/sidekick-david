@@ -4,21 +4,13 @@
     ],
     "languages": [
 	{
-	    "js": [
-		"sidekick-eslint",
-		"sidekick-js-todos",
-		"sidekick-jscs"
-            ]
-        },
+	    "0": []
+	},
 	{
-	    "json": [
-                "sidekick-david"
-            ]
-        },
+	    "1": []
+	},
 	{
-	    "all": [
-                "sidekick-security"
-            ]
+	    "2": []
 	}
     ]
 }
