@@ -54,8 +54,8 @@ describe('dependency analyser', function() {
             location: {
               startCol: 0,
               endCol: 0,
-              startLine: 26,
-              endLine: 26
+              startLine: 27,
+              endLine: 27
             }
           };
 
