@@ -1,6 +1,6 @@
 'use strict';
 
-const sidekickAnalyser = require("sidekick-analyser");
+const sidekickAnalyser = require("@sidekick/analyser-common");
 const fs = require('fs');
 const path = require('path');
 
