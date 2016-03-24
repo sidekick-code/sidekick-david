@@ -1,7 +1,5 @@
 {
-    "exclude": [
-	"/node_modules"
-    ],
+    "exclude": [],
     "languages": [
 	{
 	    "js": [
